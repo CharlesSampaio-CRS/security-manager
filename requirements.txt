@@ -1,5 +1,4 @@
 altgraph==0.17.4
-apturl==0.5.2
 attrs==21.2.0
 Automat==20.2.0
 bcrypt==3.2.0
