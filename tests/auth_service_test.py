@@ -1,3 +1,4 @@
+import mongomock
 import pytest
 from flask import Flask
 from unittest.mock import patch
@@ -26,7 +27,8 @@ def client(app):
 @pytest.fixture(autouse=True)
 def reset_database():
     """Reseta o banco de dados antes de cada teste."""
-    users_collection.delete_many({})
+    with patch('config.database.users_collection', mongomock.MongoClient().db.users):
+        yield
 
 @patch('services.auth_service.database.users_collection.find_one')
 @patch('services.auth_service.bcrypt.hashpw')
