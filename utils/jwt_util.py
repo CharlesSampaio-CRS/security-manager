@@ -3,14 +3,28 @@ from typing import Dict
 import jwt
 from config import secrets
 
-def generate_token(user: Dict) -> str:
+
+def generate_token(username, email, role):
+    expiration_time = 3600  
     payload = {
-        "sub": user.get("email"),
-        "role": user.get("role"),
-        "iat": datetime.datetime.utcnow(),
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)
+        'sub': username,
+        'email': email,
+        'grants': get_grants(role),
+        'authorities': get_grants(role),
+        'credentials': role,
+        'iat': datetime.datetime.utcnow(),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=expiration_time)
     }
-    return jwt.encode(payload, secrets.get_secret(), algorithm="HS256")
+
+    token = jwt.encode(payload, secrets.get_secret(), algorithm='HS256')
+    return token
 
 def decode_token(token: str) -> Dict:
     return jwt.decode(token, secrets.get_secret(), algorithms=["HS256"])
+
+def get_grants(role):
+    if role.upper() == "ADMIN":
+        return ["ROLE_ADMIN", "ROLE_USER"]
+    return ["ROLE_USER"]
+
+
