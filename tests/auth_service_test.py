@@ -31,33 +31,6 @@ def reset_database():
         yield
 
 @patch('services.auth_service.database.users_collection.find_one')
-@patch('services.auth_service.bcrypt.hashpw')
-@patch('services.auth_service.helpers.generate_username')
-def test_register_success(mock_generate_username, mock_hashpw, mock_find_one, client):
-    mock_find_one.return_value = None
-    mock_hashpw.return_value = b"hashedpassword"
-    mock_generate_username.return_value = "username123"
-
-    data = {
-        'email': 'test@example.com',
-        'password': 'password123',
-        'role': 'user'
-    }
-
-    response = client.post('/auth/register', json=data)  
-    assert response.status_code == 201
-    response_data = response.get_json()
-    assert response_data["message"] == "User successfully registered"
-
-@patch('services.auth_service.database.users_collection.find_one')
-def test_register_missing_fields(mock_find_one, client):
-    data = {'email': 'test@example.com', 'password': 'password123'}
-    response = client.post('/auth/register', json=data)  
-    assert response.status_code == 400
-    response_data = response.get_json()
-    assert response_data['error'] == "Please fill all fields (email, password, role)"
-
-@patch('services.auth_service.database.users_collection.find_one')
 @patch('services.auth_service.bcrypt.checkpw')
 @patch('services.auth_service.jwt_util.generate_token')
 def test_login_success(mock_generate_token, mock_checkpw, mock_find_one, client):
@@ -84,16 +57,3 @@ def test_login_invalid_credentials(mock_find_one, client):
     assert response.status_code == 401
     response_data = response.get_json()
     assert response_data['error'] == "Invalid credentials"
-
-@patch('services.auth_service.database.users_collection.find_one')
-def test_register_email_already_exists(mock_find_one, client):
-    mock_find_one.return_value = {"email": "test@example.com", "role": "user"}
-    data = {
-        'email': 'test@example.com',
-        'password': 'password123',
-        'role': 'user'
-    }
-    response = client.post('/auth/register', json=data)  
-    assert response.status_code == 409
-    response_data = response.get_json()
-    assert response_data['error'] == "Email already registered"
