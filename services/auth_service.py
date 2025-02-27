@@ -66,7 +66,6 @@ class AuthService:
         if not user or not bcrypt.checkpw(password.encode('utf-8'), user['password']):
             return jsonify({"error": "Invalid credentials"}), 401
 
-        user_data = {"email": user["email"], "role": user["role"]}
-        token = jwt_util.generate_token(user_data)
+        token = jwt_util.generate_token(user.get("username"), user.get("email"), user.get("role"))
 
         return jsonify({"message": "Login successful", "token": token})
