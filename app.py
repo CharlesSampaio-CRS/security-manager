@@ -10,3 +10,4 @@ app.register_blueprint(auth_routes, url_prefix='/api/v1/auth')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
+    
