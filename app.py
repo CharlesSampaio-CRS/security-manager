@@ -6,7 +6,7 @@ from config.secrets import get_secret
 app = Flask(__name__)
 app.config['SECRET_KEY'] = get_secret()
 
-app.register_blueprint(auth_routes, url_prefix='/auth')
+app.register_blueprint(auth_routes, url_prefix='/api/v1/auth')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
