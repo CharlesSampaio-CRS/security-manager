@@ -1,28 +1,35 @@
-import datetime
-from typing import Dict
+from datetime import datetime, timedelta
 import jwt
-from config import secrets
+from typing import Dict
 
+from config.secrets import get_secret
 
-def generate_token(username, email, role):
-    expiration_time = 3600  
+def generate_token(username: str, email: str, role: str) -> str:
+    """Gera um JWT válido por 1 hora com HS512."""
+    expiration_time = 2 * 3600
+    grants = get_grants(role) 
+
     payload = {
         'sub': username,
         'email': email,
-        'grants': get_grants(role),
-        'authorities': get_grants(role),
+        'grants': grants,
+        'authorities': grants,
         'credentials': role,
-        'iat': datetime.datetime.utcnow(),
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=expiration_time)
+        'iat': datetime.utcnow(),
+        'exp': datetime.utcnow() + timedelta(seconds=expiration_time)
     }
 
-    token = jwt.encode(payload, secrets.get_secret(), algorithm='HS256')
+    secret_key = get_secret()
+    token = jwt.encode(payload, secret_key, algorithm="HS512")
     return token
 
 def decode_token(token: str) -> Dict:
-    return jwt.decode(token, secrets.get_secret(), algorithms=["HS256"])
+    """Decodifica um token JWT e retorna os dados."""
+    secret_key = get_secret()
+    return jwt.decode(token, secret_key, algorithms=["HS512"])
 
-def get_grants(role):
+def get_grants(role: str):
+    """Retorna permissões baseadas no papel do usuário."""
     if role.upper() == "ADMIN":
         return ["ROLE_ADMIN", "ROLE_USER"]
     return ["ROLE_USER"]
